@@ -1,0 +1,15 @@
+{
+  "name": "HMS Desktop Environment",
+  "image": "mcr.microsoft.com/devcontainers/universal:latest",
+  "features": {
+    "ghcr.io/devcontainers/features/desktop-lite:1": {}
+  },
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": {
+      "label": "HMS GUI Desktop",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "chmod +x build.sh && javac -cp '.:sqlite-jdbc-3.42.0.0.jar' *.java"
+}
