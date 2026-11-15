@@ -3,7 +3,6 @@
 
 # Build artifacts
 *.o
-*.dylib
 *.so
 *.jnilib
 *_wrap.cxx

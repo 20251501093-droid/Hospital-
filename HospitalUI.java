@@ -19,7 +19,16 @@ import javax.swing.*;
  */
 public class HospitalUI {
 
-    static { System.loadLibrary("BillingBridge"); }
+    private static boolean nativeBridgeLoaded = false;
+    static {
+        try {
+            System.loadLibrary("BillingBridge");
+            nativeBridgeLoaded = true;
+        } catch (Throwable t) {
+            System.err.println("[Warning] Native BillingBridge library could not be loaded: " + t.getMessage());
+            nativeBridgeLoaded = false;
+        }
+    }
 
     private final String role;
     private final String username;
@@ -65,7 +74,7 @@ public class HospitalUI {
         if (role.equals("Admin")) {
             contentPanel.add(buildRegistrationPanel(), "Registration");
             contentPanel.add(buildBillingPanel(), "Billing");
-            contentPanel.add(buildOOPDemoPanel(), "OOP Demo");
+            contentPanel.add(buildOOPDemoPanel(), "Demo");
         } else if (role.equals("Doctor")) {
             contentPanel.add(buildDoctorPanel(), "Records");
             contentPanel.add(buildPrescriptionPanel(), "Prescriptions");
@@ -137,7 +146,7 @@ public class HospitalUI {
         if (role.equals("Admin")) {
             addSidebarButton(sidebar, "\uD83D\uDCDD", "Patient Registration", "Registration");
             addSidebarButton(sidebar, "\uD83D\uDCB3", "Discharge Billing", "Billing");
-            addSidebarButton(sidebar, "\uD83C\uDF93", "OOP Concepts", "OOP Demo");
+            addSidebarButton(sidebar, "\uD83C\uDF93", "Demo", "Demo");
         } else if (role.equals("Doctor")) {
             addSidebarButton(sidebar, "\uD83D\uDCC1", "Medical Records", "Records");
             addSidebarButton(sidebar, "\uD83D\uDCDD", "Issue Prescription", "Prescriptions");
@@ -448,8 +457,13 @@ public class HospitalUI {
             calcBtn.setText("Processing...");
 
             HospitalTaskManager.getInstance().runInBackground(
-                () -> BillingBridge.processDischarge(
-                    billIdField.getText(), Double.parseDouble(amountField.getText()), vipField.getText()),
+                () -> {
+                    if (!nativeBridgeLoaded) {
+                        throw new IllegalStateException("Native library (libBillingBridge) is not compiled or loaded for this operating system. Please run 'build.sh' or build with CMake/SWIG.");
+                    }
+                    return BillingBridge.processDischarge(
+                        billIdField.getText(), Double.parseDouble(amountField.getText()), vipField.getText());
+                },
                 result -> {
                     receiptArea.setText(result);
                     calcBtn.setEnabled(true);
