@@ -1,9 +1,15 @@
 import java.util.ArrayList;
 
 public class Main {
+    private static boolean nativeLoaded = false;
     static {
-        
-        System.loadLibrary("BillingBridge"); 
+        try {
+            System.loadLibrary("BillingBridge");
+            nativeLoaded = true;
+        } catch (Throwable t) {
+            System.out.println("[Notice] Native BillingBridge library not found on this system: " + t.getMessage());
+            nativeLoaded = false;
+        }
     }
     public static void main(String[] args) {
         System.out.println("=============================================");
@@ -48,16 +54,19 @@ public class Main {
         LabTechnician tech = (LabTechnician) staffList.get(2);
         tech.conductTest("Complete Blood Count (CBC)");
         System.out.println("\n--- C++ Native Billing (SWIG + Friend Operator) ---");
-        
-        MedicalBill bill1 = new MedicalBill("B101", 150.0);
-        MedicalBill bill2 = new MedicalBill("B102", 75.5);
-        
-        // This calls the C++ friend operator+ in the background!
-        MedicalBill total = bill1.add(bill2); 
-        
-        System.out.println("Bill 1: " + bill1.getBillId() + " | $" + bill1.getAmount());
-        System.out.println("Bill 2: " + bill2.getBillId() + " | $" + bill2.getAmount());
-        System.out.println("Combined Bill: " + total.getBillId() + " | $" + total.getAmount());
+        if (nativeLoaded) {
+            MedicalBill bill1 = new MedicalBill("B101", 150.0);
+            MedicalBill bill2 = new MedicalBill("B102", 75.5);
+            
+            // This calls the C++ friend operator+ in the background!
+            MedicalBill total = bill1.add(bill2); 
+            
+            System.out.println("Bill 1: " + bill1.getBillId() + " | $" + bill1.getAmount());
+            System.out.println("Bill 2: " + bill2.getBillId() + " | $" + bill2.getAmount());
+            System.out.println("Combined Bill: " + total.getBillId() + " | $" + total.getAmount());
+        } else {
+            System.out.println("Skipping C++ native billing demo (native binary not compiled for this Linux/x86 environment).");
+        }
     
     }
 }

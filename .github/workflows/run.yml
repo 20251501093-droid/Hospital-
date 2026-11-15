@@ -21,9 +21,21 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Install Build Tools (CMake & SWIG)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake swig g++
+
+    - name: Build Native C++ Bridge for Linux
+      run: |
+        cmake -B build -S .
+        cmake --build build
+        # Copy compiled .so shared library to project root
+        cp build/libBillingBridge.so . 2>/dev/null || true
+
     - name: Compile and Test HMS
       run: |
         chmod +x build.sh
         javac -cp ".:sqlite-jdbc-3.42.0.0.jar" *.java
         echo "=== Running Headless Backend Test ==="
-        java -Djava.awt.headless=true -cp ".:sqlite-jdbc-3.42.0.0.jar" Main
+        java -Djava.library.path=. -Djava.awt.headless=true -cp ".:sqlite-jdbc-3.42.0.0.jar" Main
