@@ -1,75 +1,34 @@
 #!/bin/bash
 # =============================================================
-#  Hospital Management System — Build & Run Script
-#  Works on macOS, Linux, and Windows (Git Bash / WSL)
+#  Hospital Management System — C++ OOP Terminal Edition
+#  Universal Cross-Platform Build & Run Script (macOS / Linux)
 # =============================================================
 
 set -e
 
-JAR="sqlite-jdbc-3.42.0.0.jar"
-JAR_URL="https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.42.0.0/sqlite-jdbc-3.42.0.0.jar"
-LIB="libBillingBridge"
+echo "=========================================================="
+echo " 🏥 Building Hospital Management System (C++ Terminal App)"
+echo "=========================================================="
 
-echo "============================================="
-echo " Hospital Management System — Build Script"
-echo "============================================="
-echo ""
-
-# --- Step 1: Download SQLite JDBC if missing ---
-if [ ! -f "$JAR" ]; then
-    echo "[1/4] Downloading SQLite JDBC driver..."
-    if command -v curl &> /dev/null; then
-        curl -L -o "$JAR" "$JAR_URL"
-    elif command -v wget &> /dev/null; then
-        wget -O "$JAR" "$JAR_URL"
-    else
-        echo "ERROR: Neither curl nor wget found. Please download manually:"
-        echo "  $JAR_URL"
-        exit 1
-    fi
-    echo "      Downloaded $JAR"
+# Auto-detect available C++ compiler
+if command -v clang++ &> /dev/null; then
+    CXX="clang++"
+elif command -v g++ &> /dev/null; then
+    CXX="g++"
+elif command -v c++ &> /dev/null; then
+    CXX="c++"
 else
-    echo "[1/4] SQLite JDBC driver found ✓"
+    echo "ERROR: No C++ compiler found (clang++ or g++ required)."
+    echo "Please install Xcode Command Line Tools (macOS) or build-essential (Linux)."
+    exit 1
 fi
 
-# --- Step 2: Build native C++ library if missing ---
-if [ -f "${LIB}.dylib" ] || [ -f "${LIB}.so" ]; then
-    echo "[2/4] Native library found ✓"
-    # Re-sign on macOS if needed
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        codesign --force --sign - ${LIB}.dylib 2>/dev/null || true
-    fi
-else
-    echo "[2/4] Native library not found. Attempting to build..."
-    if command -v cmake &> /dev/null && command -v swig &> /dev/null; then
-        mkdir -p build && cd build
-        cmake .. && make
-        cp ${LIB}.* .. 2>/dev/null || true
-        cd ..
-        echo "      Native library built ✓"
-    else
-        echo "WARNING: cmake/swig not installed. C++ billing features will be disabled."
-        echo "         Install with: brew install cmake swig (macOS) or apt install cmake swig (Linux)"
-    fi
-fi
+echo "  -> Detected Compiler: $CXX"
+echo "  -> Compiling main.cpp with C++17 and -pthread..."
 
-# --- Step 3: Compile Java sources ---
-echo "[3/4] Compiling Java sources..."
-javac -cp ".:${JAR}" *.java
-echo "      Compilation successful ✓"
+$CXX -std=c++17 -Wall -Wextra -O2 -pthread main.cpp -o hms
 
-# --- Step 4: Launch ---
-echo "[4/4] Launching Hospital Management System..."
 echo ""
-echo "  Login Credentials:"
-echo "  ─────────────────────────────────────"
-echo "  Admin:      admin / admin123"
-echo "  Doctor:     dr_house / doc123"
-echo "  Pharmacist: tech_lisa / tech123"
-echo "  ─────────────────────────────────────"
-echo ""
-
-java -cp ".:${JAR}" \
-     -Djava.library.path=. \
-     --enable-native-access=ALL-UNNAMED \
-     LoginUI
+echo "Compilation complete! Launching Terminal Application..."
+echo "=========================================================="
+./hms

@@ -6,6 +6,8 @@
 *.so
 *.jnilib
 *_wrap.cxx
+hms
+hms.exe
 
 # IDE files
 .idea/
@@ -28,9 +30,8 @@ hospital.db
 # Temp files
 tempCodeRunnerFile.java
 
-# Local documentation & handover reports
-PROJECT_HANDOFF_REPORT.md
-PROJECT_OOP_AND_UML_REPORT.md
+# Markdown documentation files
+*.md
 
 # Git internals (if accidentally copied)
 ORIG_HEAD
